@@ -18,6 +18,7 @@ namespace ObjectMapping
         private static Func<TIn, TOut> Convert;
         private Dictionary<string, Func<TIn, TOut, TOut>> proptertyMapping;
 
+        ///转换结果
         public TOut AutoMapper (TIn tIn)
         {
 
@@ -34,56 +35,53 @@ namespace ObjectMapping
             }
             return tout;
         }
+        //从目标属性转换
         public Mapper<TOut, TIn> Property<TProperty> (Expression<Func<TOut, TProperty>> expression, Func<TIn, TProperty> convert)
         {
-            var memberExpesssion = expression.Body as MemberExpression;
-            var valuefun = GetPropertyFunc<TProperty> (memberExpesssion.Member.Name);
-            proptertyMapping.Add (memberExpesssion.Member.Name, (a, b) =>
+            this.Add(expression, (tin, tout) =>
             {
-                var value = convert (a);
-                valuefun (b, value);
-                return b;
+                return convert(tin);
             });
             return this;
+       
         }
+        ///自定义转换
         public Mapper<TOut, TIn> Property<TProperty> (Expression<Func<TOut, TProperty>> expression, Func<TIn, TOut, TProperty> convert)
         {
-            var memberExpesssion = expression.Body as MemberExpression;
-            var valuefun = GetPropertyFunc<TProperty> (memberExpesssion.Member.Name);
-            proptertyMapping.Add (memberExpesssion.Member.Name, (a, b) =>
-            {
-                var value = convert (a, b);
-
-                valuefun (b, value);
-                return b;
-            });
+          this.Add(expression,(tin,tout)=>{
+             return convert (tin,tout);
+          });
             return this;
         }
-        public Mapper<TOut, TIn> Property<TProperty> (Expression<Func<TOut, TProperty>> expression, Func<TOut, TProperty> convert)
+        // public Mapper<TOut, TIn> Property<TProperty> (Expression<Func<TOut, TProperty>> expression, Func<TOut, TProperty> convert)
+        // {
+        //     this.Add(expression, (tin, tout) =>
+        //     {
+        //         return convert(tout);
+        //     });
+        //     return this;
+        // }
+        private void Add<TProperty>(Expression<Func<TOut, TProperty>> expression, Func<TIn,TOut,TProperty> func)
         {
             var memberExpesssion = expression.Body as MemberExpression;
-            var valuefun = GetPropertyFunc<TProperty> (memberExpesssion.Member.Name);
-            proptertyMapping.Add (memberExpesssion.Member.Name, (a, b) =>
-            {
-                var value = convert (b);
-
-                valuefun (b, value);
-                return b;
-            });
-            return this;
+            var valuefun = GetPropertyFunc<TProperty>(memberExpesssion.Member.Name);
+            proptertyMapping.Add(memberExpesssion.Member.Name, (a, b) =>
+           {
+               var value=func(a,b);
+               valuefun(b, value);
+               return b;
+           });
         }
-        public Mapper<TOut, TIn> Property<TProperty> (Expression<Func<TOut, TProperty>> expression, Func<TProperty> convert)
+        ///自定义值
+        public Mapper<TOut, TIn> Property<TProperty>(Expression<Func<TOut, TProperty>> expression, Func<TProperty> convert)
         {
-            var memberExpesssion = expression.Body as MemberExpression;
-            var valuefun = GetPropertyFunc<TProperty> (memberExpesssion.Member.Name);
-            proptertyMapping.Add (memberExpesssion.Member.Name, (a, b) =>
+            this.Add(expression, (tin, tout) =>
             {
-                var value = convert ();
-                valuefun (b, value);
-                return b;
+                return convert();
             });
             return this;
         }
+        ///获取赋值委托
         private Action<TOut, TProperty> GetPropertyFunc<TProperty> (string name)
         {
             var parameterExpression1 = Expression.Parameter (typeof (TOut), "a");
