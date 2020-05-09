@@ -69,7 +69,7 @@ namespace ObjectMapping
             var memberInitExpression = Expression.MemberInit (Expression.New (typeof (TOut)), memberBindings);
             var expression= Expression.Lambda<Func<TIn, TOut>> (memberInitExpression, parameter);
             #if DEBUG
-            System.Console.WriteLine(expression);
+            // System.Console.WriteLine(expression);
             #endif
             return expression.Compile();
         }

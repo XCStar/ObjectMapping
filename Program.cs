@@ -10,19 +10,18 @@ namespace ObjectMapping
     {
         static void Main (string[] args)
         {
-
-            // Test01 ();
-            // Test04 ();
-            // //Test02();
-            // Test03 ();
-            Test05 ();
+            Test06 ();
+            Test01 ();
+            Test04 ();
+            //Test02();
+            Test03 ();
+            //Test05 ();
         }
         public static void Test01 ()
         {
             var h = new Human { ID = 1, Name = "test" };
             var mapper = new Mapper<Human, Person> ();
-            Expression<Func<Human, string>> expression = x => x.ID + x.Name;
-            mapper.Property (x => x.Name, expression);
+            mapper.Property (x => x.Name,x => x.ID + x.Name);
 
             var time01 = Caculate (1000000, () =>
             {
@@ -94,6 +93,20 @@ namespace ObjectMapping
             });
             System.Console.WriteLine (mapper05.AutoMapper (person));
 
+        }
+       public static void Test06 ()
+        {
+            var h = new Human { ID = 1, Name = "test" };
+            var mapper = new Mapper<Human, Person> ();
+            mapper.PropertyMap(x=>x.Name).Map(x=>{
+                return x.ID + x.Name;
+            });
+
+            var time01 = Caculate (1000000, () =>
+            {
+                var p = mapper.AutoMapper (h);
+            });
+            System.Console.WriteLine (time01.TotalMilliseconds);
         }
     }
     public class Person

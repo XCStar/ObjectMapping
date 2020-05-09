@@ -107,10 +107,10 @@ namespace ObjectMapping
         }
         private void Add(Func<TIn,TOut,TProterty> convert)
         {
+            var assignFunc = MapperExpressionCommon.AssignFunc<TOut,TProterty>(this.propterty);
             Func<TIn, TOut, TOut> func = (a, b) =>
             {
                 var value = convert (a,b);
-               var assignFunc = MapperExpressionCommon.AssignFunc<TOut,TProterty>(this.propterty);
                 assignFunc(b,value);
                 return b;
             };
