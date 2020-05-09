@@ -1,5 +1,7 @@
 ﻿using System;
 using System.Diagnostics;
+using System.Linq;
+using System.Linq.Expressions;
 using ObjectMapping.Attributes;
 
 namespace ObjectMapping
@@ -9,21 +11,20 @@ namespace ObjectMapping
         static void Main (string[] args)
         {
 
-            Test01 ();
-            Test04 ();
-            //Test02();
-            Test03 ();
+            // Test01 ();
+            // Test04 ();
+            // //Test02();
+            // Test03 ();
+            Test05();
         }
         public static void Test01 ()
         {
             var h = new Human { ID = 1, Name = "test" };
-            var mapper = new Mapper<Person, Human> ();
-            Func<Human,string> func= x =>
-            {
+            var mapper = new Mapper<Human,Person> ();
+            Expression<Func<Human,string>> expression=x=> x.ID + x.Name;
+            mapper.Property (x => x.Name, expression
+            );
 
-                return x.ID + x.Name;
-            };
-            mapper.Property (x => x.Name,func);
             var time01 = Caculate (1000000, () =>
             {
                 var p = mapper.AutoMapper (h);
@@ -33,7 +34,7 @@ namespace ObjectMapping
         public static void Test04 ()
         {
             var h = new Human { ID = 1, Name = "test" };
-            var mapper = new Mapper<Person, Human> ();
+            var mapper = new Mapper<Human,Person> ();
             var time01 = Caculate (1000000, () =>
             {
                 var p = mapper.AutoMapper (h);
@@ -71,7 +72,17 @@ namespace ObjectMapping
             sw.Stop ();
             return sw.Elapsed;
         }
-
+        public static void Test05()
+        {
+            var person=new Person{ID=234,Name="abcd"};
+            var mapper01=new Mapper<Person,Human>();
+            System.Console.WriteLine(mapper01.AutoMapper(person)); 
+            var mapper02=new Mapper<Person,Human>().Property(x=>x.ID,x=>x.ID+10086);
+            System.Console.WriteLine(mapper02.AutoMapper(person)); 
+            var mapper03=new Mapper<Person,Human>().Property(x=>x.ID,()=>int.MaxValue);
+            System.Console.WriteLine(mapper03.AutoMapper(person)); 
+            
+        }
     }
     public class Person
     {
@@ -84,5 +95,9 @@ namespace ObjectMapping
         public int ID { get; set; }
 
         public string Name { get; set; }
+        public override string ToString()
+        {
+            return $"ID:{ID} Name:{Name}";
+        }
     }
 }
