@@ -14,12 +14,12 @@ code<br>
 ```
 result:<br>
 ```
-        Person => new Human() {ID = Person.ID, Name = Person.Name}
-        ID:234 Name:abcd
-        Person => new Human() {Name = Person.Name, ID = Invoke(x => (x.ID + 10086), Person)}
-        ID:10320 Name:abcd
-        Person => new Human() {Name = Person.Name, ID = Invoke(() => 2147483647)}
-        ID:2147483647 Name:abcd
+    Person => new Human() {ID = Person.ID, Name = Person.Name}
+    ID:234 Name:abcd
+    Person => new Human() {Name = Person.Name, ID = Invoke(x => (x.ID + 10086), Person)}
+    ID:10320 Name:abcd
+    Person => new Human() {Name = Person.Name, ID = Invoke(() => 2147483647)}
+    ID:2147483647 Name:abcd
 ```
        
 ## lambda转换
@@ -39,6 +39,6 @@ code<br>
 ```
 result:<br>
 ```
-        Person => new Human() {ID = Person.ID}
-        ID:234 Name:vipabc
+    Person => new Human() {ID = Person.ID}
+    ID:234 Name:vipabc
 ```
