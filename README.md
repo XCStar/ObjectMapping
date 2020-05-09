@@ -1,7 +1,7 @@
 # ObjectMapping
-对象映射程序，简化版AutoMapper
-等待后续改进
-Test:
+对象映射程序，简化版AutoMapper,等待后续改进<br>
+Test:<br>
+        ##linq表达式转换
 ```
     var person=new Person{ID=234,Name="abcd"};
     var mapper01=new Mapper<Person,Human>();
@@ -18,3 +18,20 @@ Test:
         ID:10320 Name:abcd
         Person => new Human() {Name = Person.Name, ID = Invoke(() => 2147483647)}
         ID:2147483647 Name:abcd
+        ##lambda转换
+        ```
+         var mapper05 = new Mapper<Person, Human> ().PropertyMap (x => x.Name).Map(p=>
+            {
+                switch (p.Name)
+                {
+                    case "abcd":return "vipabc";
+                    case "test": return "haha";
+                    default:
+                    return "are you ok";
+                }
+            });
+            System.Console.WriteLine (mapper05.AutoMapper (person));
+        ```
+        result:
+        Person => new Human() {ID = Person.ID}
+        ID:234 Name:vipabc

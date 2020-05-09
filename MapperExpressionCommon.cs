@@ -11,7 +11,7 @@ namespace ObjectMapping
 {
     public class MapperExpressionCommon
     {
-        public static Func<TIn, TOut> GetConvertFunc<TIn, TOut> (Dictionary<string,Func<ParameterExpression,ParameterExpression,InvocationExpression>> properties) where TIn : class where TOut : class
+        public static Func<TIn, TOut> GetConvertFunc<TIn, TOut> (Dictionary<string,Func<ParameterExpression,InvocationExpression>> properties,HashSet<string> complexPropterties) where TIn : class where TOut : class
         {
             //https://github.com/XCStar/ObjectMapping.git
             var inType = typeof (TIn);
@@ -20,10 +20,13 @@ namespace ObjectMapping
             var outDic = outPropertyInfos.ToDictionary (t => t.Name, t => t);
             var inPropertyInfos = inType.GetProperties ();
             ParameterExpression parameter = Expression.Parameter (typeof (TIn), inType.Name);
-            var outParameter=Expression.Parameter(typeof(TOut),outType.Name);
             var memberBindings = new List<MemberBinding> ();
             foreach (PropertyInfo inProperty in inPropertyInfos)
             {
+                if(complexPropterties.Contains(inProperty.Name))
+                {
+                    continue;
+                }
                 if(properties!=null&&properties.ContainsKey(inProperty.Name))
                 {
                     continue;
@@ -59,11 +62,9 @@ namespace ObjectMapping
             {
                 if(outDic.ContainsKey(item.Key))
                 {
-                    var memberBinding=Expression.Bind(outDic[item.Key],item.Value(parameter,outParameter));
+                    var memberBinding=Expression.Bind(outDic[item.Key],item.Value(parameter));
                     memberBindings.Add(memberBinding);
-                }
-               
-                
+                }  
             }
             var memberInitExpression = Expression.MemberInit (Expression.New (typeof (TOut)), memberBindings);
             var expression= Expression.Lambda<Func<TIn, TOut>> (memberInitExpression, parameter);
@@ -71,6 +72,23 @@ namespace ObjectMapping
             System.Console.WriteLine(expression);
             #endif
             return expression.Compile();
+        }
+        
+        /// <summary>
+        /// 给对象赋值
+        /// </summary>
+        /// <param name="proptertyValue"></param>
+        /// <returns></returns>
+        public static Action<TOut, TProterty> AssignFunc<TOut,TProterty> (string proptertyName)
+        {
+            var outType = typeof (TOut);
+            var outParameterExpression = Expression.Parameter (outType, outType.Name);
+            var proptertyType=typeof(TProterty);
+            var proptertyParameterExpression=Expression.Parameter(proptertyType,proptertyType.Name);
+            var proptertyExpression = Expression.Property (outParameterExpression, proptertyName);
+            var assingExpression = Expression.Assign (proptertyExpression,proptertyParameterExpression);
+            var expression = Expression.Lambda<Action<TOut, TProterty>> (assingExpression, outParameterExpression,proptertyParameterExpression);
+            return expression.Compile ();
         }
     }
 }
